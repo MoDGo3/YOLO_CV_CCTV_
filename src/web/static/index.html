@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CCTV MQTT Dashboard</title>
+  <style>
+    :root {
+      --bg-primary: #10121b;
+      --bg-secondary: #171b27;
+      --bg-card: #1f2435;
+      --border-color: rgba(255, 255, 255, 0.06);
+      --accent: #4f7efa;
+      --success: #2dd4bf;
+      --danger: #f97070;
+      --text-primary: #f7f9ff;
+      --text-secondary: #b5bfd4;
+      --muted: #7c85a2;
+      --shadow: 0 24px 40px rgba(18, 22, 35, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+      color: var(--text-primary);
+      background: radial-gradient(circle at top left, rgba(79, 126, 250, 0.12), transparent 45%), var(--bg-primary);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      width: min(1100px, 100%);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    header.top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand-title {
+      font-size: clamp(1.5rem, 2vw + 0.5rem, 2.1rem);
+      letter-spacing: 0.02em;
+      margin: 0;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(79, 126, 250, 0.18);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--muted);
+      display: inline-block;
+      box-shadow: 0 0 10px rgba(125, 137, 169, 0.6);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .status-pill[data-state="connected"] {
+      background: rgba(45, 212, 191, 0.18);
+      color: var(--success);
+    }
+
+    .status-pill[data-state="connected"] .status-indicator {
+      background: var(--success);
+      box-shadow: 0 0 12px rgba(45, 212, 191, 0.6);
+    }
+
+    .status-pill[data-state="error"] {
+      background: rgba(249, 112, 112, 0.18);
+      color: var(--danger);
+    }
+
+    .status-pill[data-state="error"] .status-indicator {
+      background: var(--danger);
+      box-shadow: 0 0 12px rgba(249, 112, 112, 0.6);
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 10px;
+      background: rgba(79, 126, 250, 0.18);
+      color: var(--text-primary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      min-width: 90px;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(79, 126, 250, 0.3);
+      box-shadow: 0 12px 24px rgba(24, 99, 243, 0.22);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    main.content {
+      display: grid;
+      gap: 24px;
+    }
+
+    .panel {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+    }
+
+    .panel-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
+    }
+
+    .stats-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: transform 0.25s ease, border-color 0.25s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(79, 126, 250, 0.45);
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-value {
+      font-size: clamp(1.8rem, 3vw + 1rem, 2.4rem);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    #messages {
+      max-height: 55vh;
+      overflow-y: auto;
+      display: grid;
+      gap: 14px;
+      padding-right: 6px;
+    }
+
+    #messages::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #messages::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    #messages::-webkit-scrollbar-thumb {
+      background: rgba(79, 126, 250, 0.35);
+      border-radius: 10px;
+    }
+
+    .msg {
+      background: var(--bg-card);
+      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      display: grid;
+      gap: 10px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .msg-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topic {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+    }
+
+    .msg-time {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .payload {
+      color: var(--text-secondary);
+      font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      background: rgba(12, 15, 25, 0.55);
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    @media (min-width: 992px) {
+      main.content {
+        grid-template-columns: 1fr;
+      }
+
+      .content-columns {
+        display: grid;
+        grid-template-columns: 1.1fr 1.6fr;
+        gap: 24px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page {
+        padding: 20px 16px 32px;
+      }
+
+      header.top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .status-bar {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      #messages {
+        max-height: 50vh;
+      }
+    }
+
+    @media (max-width: 480px) {
+      button {
+        flex: 1 1 auto;
+        width: 100%;
+        text-align: center;
+      }
+
+      .status-bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .action-buttons {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="top-bar">
+      <div class="brand">
+        <h1 class="brand-title">CCTV MQTT Dashboard</h1>
+        <p class="brand-subtitle">สตรีมข้อมูลเรียลไทม์สำหรับการติดตามและวิเคราะห์การเข้าออก</p>
+      </div>
+      <div class="status-bar">
+        <span id="stat" class="status-pill" data-state="disconnected">
+          <span class="status-indicator"></span>
+          Disconnected
+        </span>
+        <div class="action-buttons">
+          <button id="btnPing" type="button">Ping</button>
+          <button id="btnReset" type="button">Reset</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="content-columns">
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Live Counters</h3>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <span class="stat-label">In</span>
+              <span class="stat-value" id="in-count">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Out</span>
+              <span class="stat-value" id="out-count">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Asia</span>
+              <span class="stat-value" id="asia-count">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Europe</span>
+              <span class="stat-value" id="europe-count">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Male</span>
+              <span class="stat-value" id="male-count">0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Female</span>
+              <span class="stat-value" id="female-count">0</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Realtime Event Feed</h3>
+          </div>
+          <div id="messages" aria-live="polite"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const stat = document.getElementById('stat');
+    const messages = document.getElementById('messages');
+    let ws = null;
+    let reconnectTimer = null;
+    let reconnectAttempts = 0;
+
+    const setStatus = (state, label) => {
+      stat.dataset.state = state;
+      stat.textContent = '';
+      const indicator = document.createElement('span');
+      indicator.className = 'status-indicator';
+      const text = document.createElement('span');
+      text.textContent = label;
+      stat.appendChild(indicator);
+      stat.appendChild(text);
+    };
+
+    const updateStats = (stats) => {
+      document.getElementById('in-count').innerText = stats.in_count || 0;
+      document.getElementById('out-count').innerText = stats.out_count || 0;
+      document.getElementById('asia-count').innerText = stats.asia_count || 0;
+      document.getElementById('europe-count').innerText = stats.europe_count || 0;
+      document.getElementById('male-count').innerText = stats.male_count || 0;
+      document.getElementById('female-count').innerText = stats.female_count || 0;
+    };
+
+    const resetDashboard = () => {
+      updateStats({});
+      messages.innerHTML = '';
+    };
+
+    const createMessageCard = (data) => {
+      const card = document.createElement('article');
+      card.className = 'msg';
+
+      const header = document.createElement('div');
+      header.className = 'msg-header';
+
+      const topic = document.createElement('div');
+      topic.className = 'topic';
+      topic.textContent = data.topic || data.type || 'message';
+
+      const time = document.createElement('div');
+      time.className = 'msg-time';
+      const ts = typeof data.timestamp === 'number' ? data.timestamp : Date.now() / 1000;
+      time.textContent = new Date(ts * 1000).toLocaleString();
+
+      header.appendChild(topic);
+      header.appendChild(time);
+
+      const payload = document.createElement('div');
+      payload.className = 'payload';
+      payload.textContent = JSON.stringify(data.payload || data, null, 2);
+
+      card.appendChild(header);
+      card.appendChild(payload);
+
+      return card;
+    };
+
+    const handleMessage = (ev) => {
+      try {
+        const data = JSON.parse(ev.data);
+        if (data.stats) {
+          updateStats(data.stats);
+        }
+        const card = createMessageCard(data);
+        messages.appendChild(card);
+        messages.scrollTop = messages.scrollHeight;
+      } catch (e) {
+        const fallback = document.createElement('article');
+        fallback.className = 'msg';
+        fallback.textContent = ev.data;
+        messages.appendChild(fallback);
+      }
+    };
+
+    const scheduleReconnect = () => {
+      if (reconnectTimer) {
+        return;
+      }
+      reconnectAttempts += 1;
+      const delay = Math.min(10000, reconnectAttempts * 3000);
+      setStatus('connecting', 'Reconnecting…');
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        connect();
+      }, delay);
+    };
+
+    const connect = () => {
+      setStatus('connecting', 'Connecting…');
+      const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
+      ws = new WebSocket(protocol + location.host + '/ws');
+      ws.addEventListener('open', () => {
+        setStatus('connected', 'Connected');
+        resetDashboard();
+        reconnectAttempts = 0;
+        if (reconnectTimer) {
+          clearTimeout(reconnectTimer);
+          reconnectTimer = null;
+        }
+      });
+      ws.addEventListener('close', () => {
+        setStatus('disconnected', 'Disconnected');
+        scheduleReconnect();
+      });
+      ws.addEventListener('error', () => {
+        setStatus('error', 'Connection Error');
+        try {
+          ws.close();
+        } catch (e) {
+          // ignore close errors
+        }
+      });
+      ws.addEventListener('message', handleMessage);
+    };
+
+    connect();
+
+    document.getElementById('btnPing').addEventListener('click', () => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send('ping');
+      }
+    });
+
+    const btnReset = document.getElementById('btnReset');
+    btnReset.addEventListener('click', async () => {
+      btnReset.disabled = true;
+      try {
+        const response = await fetch('/reset', { method: 'POST' });
+        if (!response.ok) {
+          throw new Error('Reset failed');
+        }
+        resetDashboard();
+      } catch (err) {
+        console.error(err);
+        setStatus('error', 'Reset failed');
+      } finally {
+        btnReset.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
