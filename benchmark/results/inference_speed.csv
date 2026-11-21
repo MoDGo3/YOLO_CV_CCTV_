@@ -1,0 +1,6 @@
+Metric,Value,Unit
+Pre-process,2.01,ms
+Inference,60.76,ms
+Post-process,0.54,ms
+Total,63.55,ms
+FPS,15.7,frames/sec

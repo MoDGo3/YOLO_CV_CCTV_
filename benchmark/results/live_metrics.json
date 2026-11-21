@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-06-25T13:00:08.085120",
+  "fps": 1.357420540746057,
+  "total_frames": 0,
+  "session_duration_seconds": 193.243169,
+  "in_count": {
+    "Male": 0,
+    "Female": 0,
+    "Unknown": 0
+  },
+  "out_count": {
+    "Male": 0,
+    "Female": 0,
+    "Unknown": 0
+  },
+  "tracked_count": 2
+}

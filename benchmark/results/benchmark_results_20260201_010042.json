@@ -1,0 +1,139 @@
+{
+  "timestamp": "2026-01-31T23:35:02.658378",
+  "system_info": {
+    "os": "Windows",
+    "os_version": "10.0.19045",
+    "python_version": "3.10.0",
+    "ram_gb": 15.9,
+    "processor": "Intel64 Family 6 Model 158 Stepping 9, GenuineIntel"
+  },
+  "inference_speed": {
+    "num_frames": 50,
+    "preprocess_ms": 2.01,
+    "inference_ms": 60.76,
+    "postprocess_ms": 0.54,
+    "total_ms": 63.55,
+    "total_std_ms": 12.76,
+    "fps": 15.7,
+    "min_ms": 58.33,
+    "max_ms": 151.07,
+    "realtime_status": "acceptable"
+  },
+  "gender_metrics": {
+    "total_samples": 5000,
+    "accuracy": 0.695,
+    "accuracy_percent": 69.5,
+    "class_metrics": {
+      "Woman": {
+        "precision": 0.871,
+        "recall": 0.425,
+        "f1_score": 0.571,
+        "support": 2389
+      },
+      "Man": {
+        "precision": 0.642,
+        "recall": 0.942,
+        "f1_score": 0.764,
+        "support": 2611
+      }
+    }
+  },
+  "ethnicity_metrics": {
+    "total_samples": 3256,
+    "accuracy": 0.508,
+    "accuracy_percent": 50.8,
+    "class_metrics": {
+      "black": {
+        "precision": 0.632,
+        "recall": 0.759,
+        "f1_score": 0.69,
+        "support": 686
+      },
+      "indian": {
+        "precision": 0.785,
+        "recall": 0.427,
+        "f1_score": 0.553,
+        "support": 583
+      },
+      "latino hispanic": {
+        "precision": 0.531,
+        "recall": 0.379,
+        "f1_score": 0.442,
+        "support": 583
+      },
+      "white": {
+        "precision": 0.595,
+        "recall": 0.808,
+        "f1_score": 0.685,
+        "support": 819
+      }
+    }
+  },
+  "confusion_matrices": {
+    "gender": {
+      "Woman": {
+        "Man": 1373,
+        "Woman": 1016
+      },
+      "Man": {
+        "Man": 2460,
+        "Woman": 151
+      }
+    },
+    "ethnicity": {
+      "black": {
+        "white": 126,
+        "black": 521,
+        "asian": 62,
+        "middle eastern": 16,
+        "indian": 14,
+        "latino hispanic": 25
+      },
+      "indian": {
+        "indian": 249,
+        "black": 122,
+        "latino hispanic": 93,
+        "asian": 89,
+        "white": 119,
+        "middle eastern": 39
+      },
+      "latino hispanic": {
+        "latino hispanic": 221,
+        "black": 119,
+        "asian": 153,
+        "white": 206,
+        "indian": 37,
+        "middle eastern": 73
+      },
+      "white": {
+        "asian": 86,
+        "white": 662,
+        "middle eastern": 67,
+        "latino hispanic": 77,
+        "black": 63,
+        "indian": 17
+      }
+    }
+  },
+  "environmental_tests": {
+    "note": "Reference values based on typical CCTV scenarios",
+    "normal_light": {
+      "name": "แสงปกติ (กลางวัน)",
+      "counting_accuracy": 95.0,
+      "classification_accuracy": 92.0,
+      "conditions": "Illuminance > 300 lux"
+    },
+    "low_light": {
+      "name": "แสงน้อย (กลางคืน)",
+      "counting_accuracy": 85.0,
+      "classification_accuracy": 72.0,
+      "conditions": "Illuminance < 100 lux"
+    }
+  },
+  "deepface_speed": {
+    "avg_ms": 1026.87,
+    "min_ms": 824.73,
+    "max_ms": 4682.74,
+    "fps": 1.0
+  }
+}
