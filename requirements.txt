@@ -1,0 +1,55 @@
+# YOLO CV CCTV - People Tracking + Demographics Analytics
+# ติดตั้ง: pip install -r requirements.txt
+
+# Core Computer Vision
+opencv-python>=4.8.0
+ultralytics>=8.0.0
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Face Analysis & Demographics
+deepface>=0.0.79
+tf-keras>=2.15.0
+onnx>=1.14.0
+onnxruntime>=1.15.0  # CPU runtime
+scikit-learn>=1.3.0
+# Optional: face_recognition (ใช้ dlib) — บน Windows ต้องมี Visual Studio Build Tools + CMake
+# หรือติดตั้ง dlib จาก wheel สำเร็จรูป ระบบหลักใช้ DeepFace จึงไม่จำเป็น
+face_recognition>=1.3.0
+dlib>=19.24.0
+cmake>=3.27.0
+
+# Tracking
+deep-sort-realtime>=1.3.1
+filterpy>=1.4.5
+scipy>=1.11.0
+numpy>=1.24.0
+
+# Communication & Data
+# paho-mqtt 2.x เปลี่ยนรูปแบบ callback (on_connect/on_disconnect) — โค้ดนี้เขียนสำหรับ 1.x
+paho-mqtt>=1.6.0,<2.0
+requests>=2.31.0
+python-dotenv>=1.0.0  # อ่านรหัสผ่านจากไฟล์ .env
+
+# GUI & Visualization
+Pillow>=10.0.0
+matplotlib>=3.7.0
+
+# Utilities
+PyYAML>=6.0
+tqdm>=4.65.0
+psutil>=5.9.0
+
+# Performance & Optimization
+numba>=0.57.0
+
+# Web dashboards
+fastapi>=0.95.0
+uvicorn[standard]>=0.22.0
+streamlit>=1.35.0
+pandas>=2.0.0
+
+# Development (optional)
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
