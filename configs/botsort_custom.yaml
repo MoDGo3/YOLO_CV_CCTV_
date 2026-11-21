@@ -1,0 +1,15 @@
+# Ultralytics YOLO 🚀, AGPL-3.0 license
+# Custom YOLO tracker settings for BoT-SORT tracker
+# Optimized for CCTV people tracking
+
+tracker_type: botsort  # tracker type, ['botsort', 'bytetrack']
+track_high_thresh: 0.4  # ลดจาก 0.5 เพื่อให้ track ง่ายขึ้น
+track_low_thresh: 0.1   # threshold for the second association  
+new_track_thresh: 0.5   # ลดจาก 0.6 เพื่อสร้าง track ใหม่ง่ายขึ้น
+track_buffer: 50        # เพิ่มจาก 30 เป็น 50 frames
+match_thresh: 0.7       # ลดจาก 0.8 เพื่อให้ match ง่ายขึ้น
+proximity_thresh: 0.4   # ลดจาก 0.5 เพื่อให้ยืดหยุ่นมากขึ้น
+appearance_thresh: 0.25 # threshold for appearance similarity (ReID)
+with_reid: False        # ปิด ReID เพื่อประสิทธิภาพ
+fuse_score: True        # Whether to fuse confidence scores with the IoU distances before matching
+gmc_method: sparseOptFlow # method of global motion compensation สำหรับกล้องที่อาจสั่น
